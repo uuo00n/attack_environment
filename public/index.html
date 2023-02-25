@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理系统</title>
+    <style>
+        a {
+            text-decoration: none;
+        }
+
+        li {
+            list-style: none;
+        }
+
+        .menu {
+            background-color: mediumpurple;
+            font-size: 20px;
+            width: 10%;
+            height: 100%;
+        }
+
+        body {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            position: absolute;
+        }
+
+        #page {
+            width: 90%;
+            height: 100%;
+        }
+
+        #subPage {
+            width: 100%;
+            height: 100%;
+        }
+
+        .menupage {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+<div class="menupage">
+    <div id="menu" class="menu">
+        <ul id="menuContent">
+            <li><a href="javascript: void(0)" onclick="openWindow('xueJiQuery.html')">学籍查询</a></li>
+            <li><a href="javascript: void(0)" onclick="openWindow('profile.html')">个人中心</a></li>
+            <li><a href="javascript: void(0)" onclick="openWindow('netDisk.html')">网盘</a></li>
+            <li><a href="javascript: void(0)" onclick="openWindow('message.html')">站内消息(<span
+                    id="unReadMsgCount">0</span>)</a>
+            </li>
+        </ul>
+    </div>
+    <div id="page">
+        <iframe id="subPage" src="">
+
+        </iframe>
+    </div>
+</div>
+</body>
+</html>
+<script src="static/js/jquery-3.4.1.min.js"></script>
+<script>
+    function openWindow(url) {
+        document.getElementById("subPage").src = url;
+    }
+
+    // function setIframeStyle() {
+    //     let height = window.screen.height;
+    //     let width = window.screen.width * 0.85;
+    //     document.getElementById("subPage").style.height = height + "px";
+    //     document.getElementById("subPage").style.width = width + "px";
+    // }
+
+    function getCookie(cookieName) {
+        let cookieList = document.cookie.split(";");
+        let currentCookie, cookieArray;
+        for (let i = 0; i < cookieList.length; i++) {
+            currentCookie = cookieList[i].split("=");
+            if (currentCookie[0] === cookieName) {
+                return currentCookie[1];
+            }
+        }
+        return false;
+    }
+
+    function addMenu() {
+        let menuList = document.getElementById("menuContent");
+        if (decodeURI(getCookie("userType")) === "管理员") {
+            let li = document.createElement("li");
+            let a = document.createElement("a");
+            a.id = "systemOperation";
+            a.innerHTML = "系统管理";
+            a.setAttribute("href", "javascript:void(0)");
+            a.onclick = function () {
+                openWindow('systemOperation.html');
+            }
+            li.appendChild(a);
+            menuList.appendChild(li);
+        } else if (decodeURI(getCookie("userType")) === "老师") {
+            let li = document.createElement("li");
+            let a = document.createElement("a");
+
+            a.id = "jiaowu";
+            a.innerHTML = "教务管理";
+            a.setAttribute("href", "javascript:void(0)");
+            a.onclick = function () {
+                openWindow('jiaowuOperation.html');
+            }
+            li.appendChild(a);
+            menuList.appendChild(li);
+
+            li = document.createElement("li");
+            a = document.createElement("a");
+            a.id = "classOperation";
+            a.innerHTML = "课程管理";
+            a.setAttribute("href", "javascript:void(0)");
+            a.onclick = function () {
+                openWindow('classOperation.html');
+            }
+            li.appendChild(a);
+            menuList.appendChild(li);
+        }
+    }
+
+    addMenu();
+
+    function indexInit() {
+        $.ajax({
+            url: "index.php/ui/Indexpage/pageInit",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    document.getElementById("unReadMsgCount").innerHTML = res.data.message.count;
+                } else {
+                    window.location.herf = "login.html";
+                }
+            },
+            error: function () {
+                alert("异步请求失败");
+            }
+        });
+    }
+
+    indexInit();
+</script>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生管理系统登陆</title>
+</head>
+<body>
+<div style="text-align: center;padding: 20%">
+    <table style="padding-left: 45%">
+        <tr>
+            <td style="font-size: 18px; font-family:Arial">用户名：</td>
+            <td><input type="text" id="username" placeholder="请输入用户名" style="font-size: 18px"></td>
+        </tr>
+        <tr>
+            <td style="font-size: 18px; font-family:Arial">密码：</td>
+            <td><input type="password" id="password" placeholder="请输入密码" style="font-size: 18px"></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button onclick="login()" style="width: 100px;height: 30px;font-family: Arial">登录</button>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
+<script src="static/js/jquery-3.4.1.min.js"></script>
+<script>
+    function login() {
+        $.ajax({
+            url: "index.php/account/Account/login",
+            //ThinkPHP 访问路径的格式：域名/控制器/模块/方法
+            type: "post",
+            dataType: "json",
+            data: {
+                "username": document.getElementById("username").value,
+                "password": document.getElementById("password").value
+            },
+            success: function (res) {
+                if (res.success) {
+                    window.location.href = "index.html";
+                } else {
+                    alert(res.msg);
+                }
+            },
+            error: function () {
+                alert("登陆请求发送失败");
+            }
+        })
+    }
+</script>

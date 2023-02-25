@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>站内消息</title>
+    <style>
+        .table {
+            border-top: 1px solid #cad9ea;
+            border-left: 1px solid #cad9ea;
+            border-spacing: 0;
+            /*去掉单元格间隙*/
+            margin: 0 auto;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        td {
+            border-bottom: 1px solid #cad9ea;
+            border-right: 1px solid #cad9ea;
+        / / border: 1 px solid #cad9ea;
+            color: #666;
+            height: 30px;
+            padding: 5px 0px;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+<div style="width: 50%">
+    消息接收人：
+    <select id="receive" style="width: 30%">
+
+    </select>
+</div>
+<div style="width: 50%">
+    消息内容：
+    <br>
+    <textarea rows="10" cols="50" id="message"></textarea>
+</div>
+<div>
+    <button onclick="sendMessage()" style="font-size: 20px">发送</button>
+</div>
+<hr>
+<input placeholder="搜索消息" id="keyword" style="font-size: 20px">
+<button onclick="searchMessage()" style="font-size: 20px">搜索</button>
+<span style="font-size: 20px"><span id="searchKeyword">你搜索的内容是：</span></span>
+<table class="table" style="width: 100%">
+    <thead>
+    <td style="width: 10%;min-width: 10%">消息ID</td>
+    <td style="width: 10%;min-width: 10%">发送人ID</td>
+    <td style="width: 60%;min-width: 60%">消息正文</td>
+    <td style="width: 10%;min-width: 10%">消息状态</td>
+    <td style="width: 10%;min-width: 10%">操作</td>
+    </thead>
+    <tbody id="messageList"></tbody>
+</table>
+<script src="static/js/jquery-3.4.1.min.js"></script>
+<script>
+    function searchMessage() {
+        document.getElementById("searchKeyword").innerHTML = document.getElementById("keyword").value;
+        $.ajax({
+            url: "index.php/ui/Messagepage/searchMessage",
+            type: 'post',
+            dataType: 'json',
+            data: {
+                // "keyword":document.getElementById("keyword").value
+                "keyword": $("#keyword").val()
+            },
+            success: function (res) {
+                if (res.success) {
+                    alert("搜索消息的正文：" + res.data.message);
+                } else {
+                    alert("未搜索到消息");
+                }
+            },
+            error: function () {
+                alert("异步请求失败，消息搜索")
+            }
+        })
+    }
+
+    function getUserList() {
+        $.ajax({
+            url: "index.php/ui/Messagepage/getUserList",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    let option;
+                    let sel = document.getElementById("receive");
+                    for (let i = 0; i < res.data.length; i++) {
+                        option = document.createElement("option");
+                        option.setAttribute("value", res.data[i].id);
+                        option.id = "userID_" + res.data[i].id;
+                        option.innerHTML = res.data[i].name;
+                        sel.appendChild(option);
+                    }
+                }
+            },
+            error: function () {
+                alert("异步请求失败，获取用户列表")
+            }
+        })
+    }
+
+    getUserList();
+
+    function sendMessage() {
+        $.ajax({
+            url: "index.php/ui/Messagepage/sendMessage",
+            type: "post",
+            data: {
+                "receiveID": $("#receive").val(),
+                "message": $("#message").val(),
+            },
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    alert(res.data);
+                }
+            },
+            error: function () {
+                alert("异步请求失败，消息发送");
+            }
+        })
+    }
+
+    function getMessageList() {
+        $.ajax({
+            url: "index.php/ui/Messagepage/getMessageList",
+            type: "get",
+            dataType: "json",
+            success: function (res) {
+                if (res.success) {
+                    var tr, td1, td2, td3, td4, td5;
+                    var tbody = document.getElementById("messageList");
+                    for (let i = 0; i < res.data.length; i++) {
+                        tr = document.createElement("tr");
+                        td1 = document.createElement("td");
+                        td1.innerHTML = res.data[i].id;
+                        td2 = document.createElement("td");
+                        td2.innerHTML = res.data[i].send_id;
+                        td3 = document.createElement("td");
+                        td3.innerHTML = res.data[i].message;
+                        td4 = document.createElement("td");
+                        td4.innerHTML = res.data[i].status;
+                        td5 = document.createElement("td");
+                        if (res.data[i].status === "未读") {
+                            td5.innerHTML = '<button onclick="setRead(' + res.data[i].id + ')">已读</button>';
+                        } else {
+                            td5.innerHTML = '<button onclick="setUnread(' + res.data[i].id + ')">未读</button>';
+                        }
+                        tr.appendChild(td1);
+                        tr.appendChild(td2);
+                        tr.appendChild(td3);
+                        tr.appendChild(td4);
+                        tr.appendChild(td5);
+                        tbody.appendChild(tr);
+                    }
+                } else {
+                    alert(res.msg);
+                }
+            },
+            error: function () {
+                alert("异步请求失败，获取消息列表")
+
+            }
+        });
+    }
+
+    getMessageList();
+</script>
+</body>
+</html>
